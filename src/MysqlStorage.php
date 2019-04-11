@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace PhpStrict\SimpleRoute;
 
+/**
+ * Routes storage based on project MySQL database.
+ */
 class MysqlStorage extends AbstractStorage
 {
     /**
