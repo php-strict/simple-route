@@ -24,6 +24,20 @@ class SimpleRouteTest extends \Codeception\Test\Unit
     
     public function testArrayStorage()
     {
+        $storage = new ArrayStorage([]);
+        $this->expectedException(
+            PhpStrict\SimpleRoute\NotFoundException::class,
+            function () use ($storage) {
+                $storage->get('');
+            }
+        );
+        $this->expectedException(
+            PhpStrict\SimpleRoute\NotFoundException::class,
+            function () use ($storage) {
+                $storage->find('');
+            }
+        );
+        
         $data = [
             '/' => [
                 'title'     => 'root title',
@@ -31,6 +45,9 @@ class SimpleRouteTest extends \Codeception\Test\Unit
                     return 'root callback result';
                 },
             ],
+            '/qwe' => [],
+            '/qwe/rty' => [],
+            '/qwe/rty/uio' => [],
             '/bad-entry-path' => 'bad entry',
         ];
         $storage = new ArrayStorage($data);
@@ -44,6 +61,16 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         $this->assertEquals('root title', $entry->data['title']);
         $this->assertTrue(is_callable($entry->data['callback']));
         $this->assertEquals('root callback result', $entry->data['callback']());
+        
+        $entry = $storage->find('/qwe/rty/param1/param2');
+        $this->assertNotNull($entry);
+        $this->assertInstanceOf(StorageEntry::class, $entry);
+        $this->assertEquals('/qwe/rty', $entry->key);
+        
+        $entry = $storage->find('/qwe/param0/param1/param2');
+        $this->assertNotNull($entry);
+        $this->assertInstanceOf(StorageEntry::class, $entry);
+        $this->assertEquals('/qwe', $entry->key);
         
         $this->expectedException(
             PhpStrict\SimpleRoute\NotFoundException::class,
