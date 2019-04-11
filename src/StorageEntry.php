@@ -24,15 +24,15 @@ class StorageEntry
     /**
      * @var array
      */
-    public $entry = [];
+    public $data = [];
     
     /**
-     * @param array $entry = []
-     * @param array $params = []
+     * @param string $key
+     * @param array $data = []
      */
-    public function __construct(string $key = '', array $entry = [])
+    public function __construct(string $key, array $data = [])
     {
         $this->key = $key;
-        $this->entry = $entry;
+        $this->data = $data;
     }
 }

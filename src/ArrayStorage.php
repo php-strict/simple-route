@@ -81,15 +81,15 @@ class ArrayStorage extends AbstractStorage
      * 
      * @param string $path
      * 
-     * @return \PhpStrict\SimpleRoute\StorageEntry
+     * @return array
      * 
      * @throws \PhpStrict\SimpleRoute\BadStorageEntryException
      */
-    protected function getEntry(string $path): StorageEntry
+    protected function getEntry(string $path): array
     {
-        $entry = $this->storage[$path];
-        if (is_array($entry)) {
-            return $entry;
+        $data = $this->storage[$path];
+        if (is_array($data)) {
+            return $data;
         }
         
         throw new BadStorageEntryException();
