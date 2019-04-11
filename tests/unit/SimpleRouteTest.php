@@ -22,7 +22,7 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         }
     }
     
-    public function testArrayStorage()
+    public function testArrayStorageEmpty()
     {
         $storage = new ArrayStorage([]);
         $this->expectedException(
@@ -37,7 +37,10 @@ class SimpleRouteTest extends \Codeception\Test\Unit
                 $storage->find('');
             }
         );
-        
+	}
+	
+	public function testArrayStorageFilled()
+	{
         $data = [
             '/' => [
                 'title'     => 'root title',
@@ -72,7 +75,7 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         $this->assertInstanceOf(StorageEntry::class, $entry);
         $this->assertEquals('/qwe', $entry->key);
         
-        $this->expectedException(
+		$this->expectedException(
             PhpStrict\SimpleRoute\NotFoundException::class,
             function () use ($storage) {
                 $storage->get('/non-existence-path');
