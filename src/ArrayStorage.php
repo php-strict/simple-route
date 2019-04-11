@@ -42,13 +42,13 @@ class ArrayStorage extends AbstractStorage
      * @throws \PhpStrict\SimpleRoute\NotFoundException
      * @throws \PhpStrict\SimpleRoute\BadStorageEntryException
      */
-    public function get(string $path): StorageEntry
+    public function get(string $key): StorageEntry
     {
-        if (!array_key_exists($path, $this->storage)) {
+        if (!array_key_exists($key, $this->storage)) {
             throw new NotFoundException();
         }
         
-        return new StorageEntry($path, $this->getEntry($path));
+        return new StorageEntry($key, $this->getEntry($key));
     }
     
     /**
@@ -61,9 +61,9 @@ class ArrayStorage extends AbstractStorage
      * @throws \PhpStrict\SimpleRoute\NotFoundException
      * @throws \PhpStrict\SimpleRoute\BadStorageEntryException
      */
-    public function find(string $path): StorageEntry
+    public function find(string $key): StorageEntry
     {
-        $paths = $this->getPaths($path);
+        $paths = $this->getPaths($key);
         
         foreach ($paths as $path) {
             if (!array_key_exists($path, $this->storage)) {
@@ -79,15 +79,15 @@ class ArrayStorage extends AbstractStorage
     /**
      * Gets route storage entry.
      * 
-     * @param string $path
+     * @param string $key
      * 
      * @return array
      * 
      * @throws \PhpStrict\SimpleRoute\BadStorageEntryException
      */
-    protected function getEntry(string $path): array
+    protected function getEntry(string $key): array
     {
-        $data = $this->storage[$path];
+        $data = $this->storage[$key];
         if (is_array($data)) {
             return $data;
         }
