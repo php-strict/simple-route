@@ -40,9 +40,9 @@ class MysqlStorage extends AbstractStorage
      * Requires link to database connected object provided by mysqli extension.
      * 
      * @param \mysqli $db
-     * @param string $table = null
-     * @param string $keyField = null
-     * @param string $dataField = null
+     * @param ?string $table = null
+     * @param ?string $keyField = null
+     * @param ?string $dataField = null
      */
     public function __construct(
         \mysqli $db, 

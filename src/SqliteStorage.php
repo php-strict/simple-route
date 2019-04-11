@@ -44,10 +44,10 @@ class SqliteStorage extends AbstractStorage
     /**
      * Requires link to database connected object provided by mysqli extension.
      * 
-     * @param string $base = null
-     * @param string $table = null
-     * @param string $keyField = null
-     * @param string $dataField = null
+     * @param ?string $base = null
+     * @param ?string $table = null
+     * @param ?string $keyField = null
+     * @param ?string $dataField = null
      */
     public function __construct(
         string $base = null, 
