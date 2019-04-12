@@ -1,6 +1,7 @@
 <?php
 use PhpStrict\SimpleRoute\Route;
 use PhpStrict\SimpleRoute\ArrayStorage;
+use PhpStrict\SimpleRoute\SqliteStorage;
 use PhpStrict\SimpleRoute\StorageEntry;
  
 class SimpleRouteTest extends \Codeception\Test\Unit
@@ -88,5 +89,28 @@ class SimpleRouteTest extends \Codeception\Test\Unit
                 $storage->get('/bad-entry-path');
             }
         );
+    }
+    
+    public function testSqliteStorageEmpty()
+    {
+        $storage = new class('') extends SqliteStorage {
+            public $db;
+        };
+        $storage->db->exec('CREATE TABLE routes ("key" VARCHAR(255) PRIMARY KEY, "data" text)');
+        
+        $this->expectedException(
+            PhpStrict\SimpleRoute\NotFoundException::class,
+            function () use ($storage) {
+                $storage->get('');
+            }
+        );
+        $this->expectedException(
+            PhpStrict\SimpleRoute\NotFoundException::class,
+            function () use ($storage) {
+                $storage->find('');
+            }
+        );
+        
+        unset($storage);
     }
 }
