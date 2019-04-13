@@ -27,8 +27,8 @@ For path '/qwe/param1/param2' route returns second entry and parameters array [p
 
 ## Supported storages:
 
-*   array
-*   file,
+*   array (supports callbacks)
+*   file (supports callbacks),
 *   SQLite,
 *   MySQL (uses main db connection from app).
 
