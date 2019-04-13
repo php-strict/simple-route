@@ -145,11 +145,11 @@ class SqliteStorage extends AbstractStorage
             throw new BadStorageEntryException(); //@codeCoverageIgnore
         }
         
-        $data = json_decode($row[$this->dataField], true);
-        if (!is_array($data)) {
+        $data = json_decode($row[$this->dataField], false);
+        if (!is_object($data)) {
             throw new BadStorageEntryException();
         }
         
-        return $data;
+        return (array) $data;
     }
 }
