@@ -3,6 +3,7 @@ use PhpStrict\SimpleRoute\Route;
 use PhpStrict\SimpleRoute\ArrayStorage;
 use PhpStrict\SimpleRoute\SqliteStorage;
 use PhpStrict\SimpleRoute\StorageEntry;
+use PhpStrict\SimpleRoute\StorageInterface;
  
 class SimpleRouteTest extends \Codeception\Test\Unit
 {
@@ -10,7 +11,7 @@ class SimpleRouteTest extends \Codeception\Test\Unit
      * @param string $expectedExceptionClass
      * @param callable $call = null
      */
-    protected function expectedException(string $expectedExceptionClass, callable $call = null)
+    protected function expectedException(string $expectedExceptionClass, callable $call = null): void
     {
         try {
             $call();
@@ -23,9 +24,8 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         }
     }
     
-    public function testArrayStorageEmpty()
+    protected function testStorageEmpty(StorageInterface $storage): void
     {
-        $storage = new ArrayStorage([]);
         $this->expectedException(
             PhpStrict\SimpleRoute\NotFoundException::class,
             function () use ($storage) {
@@ -38,6 +38,11 @@ class SimpleRouteTest extends \Codeception\Test\Unit
                 $storage->find('');
             }
         );
+    }
+    
+    public function testArrayStorageEmpty()
+    {
+        $this->testStorageEmpty(new ArrayStorage([]));
 	}
 	
 	public function testArrayStorageFilled()
@@ -98,18 +103,7 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         };
         $storage->db->exec('CREATE TABLE routes ("key" VARCHAR(255) PRIMARY KEY, "data" text)');
         
-        $this->expectedException(
-            PhpStrict\SimpleRoute\NotFoundException::class,
-            function () use ($storage) {
-                $storage->get('');
-            }
-        );
-        $this->expectedException(
-            PhpStrict\SimpleRoute\NotFoundException::class,
-            function () use ($storage) {
-                $storage->find('');
-            }
-        );
+        $this->testStorageEmpty($storage);
         
         unset($storage);
     }
