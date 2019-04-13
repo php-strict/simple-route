@@ -24,6 +24,22 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         }
     }
     
+    protected function getRoutes(): array
+    {
+        return [
+            '/' => [
+                'title'     => 'root title',
+                'callback'  => function () {
+                    return 'root callback result';
+                },
+            ],
+            '/qwe' => [],
+            '/qwe/rty' => [],
+            '/qwe/rty/uio' => [],
+            '/bad-entry-path' => 'bad entry',
+        ];
+    }
+    
     protected function testStorageEmpty(StorageInterface $storage): void
     {
         $this->expectedException(
@@ -47,19 +63,8 @@ class SimpleRouteTest extends \Codeception\Test\Unit
 	
 	public function testArrayStorageFilled()
 	{
-        $data = [
-            '/' => [
-                'title'     => 'root title',
-                'callback'  => function () {
-                    return 'root callback result';
-                },
-            ],
-            '/qwe' => [],
-            '/qwe/rty' => [],
-            '/qwe/rty/uio' => [],
-            '/bad-entry-path' => 'bad entry',
-        ];
-        $storage = new ArrayStorage($data);
+        $routes = $this->getRoutes();
+        $storage = new ArrayStorage($routes);
         
         $entry = $storage->get('/');
         $this->assertNotNull($entry);
@@ -96,14 +101,47 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         );
     }
     
-    public function testSqliteStorageEmpty()
+    protected function getSqliteStorage(): SqliteStorage
     {
         $storage = new class('') extends SqliteStorage {
             public $db;
         };
+        
         $storage->db->exec('CREATE TABLE routes ("key" VARCHAR(255) PRIMARY KEY, "data" text)');
         
+        return $storage;
+    }
+    
+    public function testSqliteStorageEmpty()
+    {
+        $storage = $this->getSqliteStorage();
+        
         $this->testStorageEmpty($storage);
+        
+        unset($storage);
+    }
+    
+    public function testSqliteStorageFilled()
+    {
+        $storage = $this->getSqliteStorage();
+        
+        $sql = '';
+        foreach ($this->getRoutes() as $key => $data) {
+            $sql .= ",('" . $key . "', '" . json_encode($data) . "')";
+        }
+        $sql =  'INSERT INTO routes ("key", "data")'
+                . ' VALUES'
+                . substr($sql, 1);
+        $storage->db->exec($sql);
+        
+        $entry = $storage->get('/');
+        $this->assertNotNull($entry);
+        $this->assertInstanceOf(StorageEntry::class, $entry);
+        $this->assertEquals('/', $entry->key);
+        $this->assertTrue(is_array($entry->data));
+        $this->assertCount(2, $entry->data);
+        $this->assertEquals('root title', $entry->data['title']);
+        $this->assertFalse(is_callable($entry->data['callback']));
         
         unset($storage);
     }
