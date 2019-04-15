@@ -94,12 +94,13 @@ class SqliteStorage extends AbstractStorage
      */
     public function get(string $key): StorageEntry
     {
-        $sql =  'SELECT "' . $this->dataField . '"'
+        $sql =  'SELECT "' . $this->keyField . '", "' . $this->dataField . '"'
                 . ' FROM "' . $this->table . '"'
                 . ' WHERE "' . $this->keyField . '"'
                 . "='" . $this->db->escapeString($key) . "'";
         
-        return new StorageEntry($key, $this->getDataByQuery($sql));
+        [$key, $data] = $this->getEntryByQuery($sql);
+        return new StorageEntry($key, $data);
     }
     
     /**
@@ -114,14 +115,15 @@ class SqliteStorage extends AbstractStorage
      */
     public function find(string $key): StorageEntry
     {
-        $sql =  'SELECT "' . $this->dataField . '"'
+        $sql =  'SELECT "' . $this->keyField . '", "' . $this->dataField . '"'
                 . ' FROM "' . $this->table . '"'
                 . ' WHERE "' . $this->keyField . '"'
                 . " IN('" . implode("','", $this->getPaths($key)) . "')"
                 . ' ORDER BY "' . $this->keyField . '" DESC'
                 . ' LIMIT 1';
         
-        return new StorageEntry($key, $this->getDataByQuery($sql));
+        [$key, $data] = $this->getEntryByQuery($sql);
+        return new StorageEntry($key, $data);
     }
     
     /**
@@ -129,12 +131,12 @@ class SqliteStorage extends AbstractStorage
      * 
      * @param string $query
      * 
-     * @return array
+     * @return array [string $key, array $data]
      * 
      * @throws \PhpStrict\SimpleRoute\NotFoundException
      * @throws \PhpStrict\SimpleRoute\BadStorageEntryException
      */
-    protected function getDataByQuery(string $query): array
+    protected function getEntryByQuery(string $query): array
     {
         $row = $this->db->querySingle($query, true);
         if (empty($row)) {
@@ -146,10 +148,10 @@ class SqliteStorage extends AbstractStorage
         }
         
         $data = json_decode($row[$this->dataField], false);
-        if (!is_object($data)) {
+        if (!is_object($data) && !is_array($data)) {
             throw new BadStorageEntryException();
         }
         
-        return (array) $data;
+        return [$row[$this->keyField], (array) $data];
     }
 }
