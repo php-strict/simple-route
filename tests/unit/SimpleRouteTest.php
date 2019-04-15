@@ -143,6 +143,16 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         $this->assertEquals('root title', $entry->data['title']);
         $this->assertFalse(is_callable($entry->data['callback']));
         
+        $entry = $storage->find('/qwe/rty/param1/param2');
+        $this->assertNotNull($entry);
+        $this->assertInstanceOf(StorageEntry::class, $entry);
+        $this->assertEquals('/qwe/rty', $entry->key);
+        
+        $entry = $storage->find('/qwe/param0/param1/param2');
+        $this->assertNotNull($entry);
+        $this->assertInstanceOf(StorageEntry::class, $entry);
+        $this->assertEquals('/qwe', $entry->key);
+        
         unset($storage);
     }
 }
