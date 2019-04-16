@@ -173,4 +173,32 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         $storage = new MysqlStorage($this->getMysqlObject(), 'routes', 'key', 'data');
         $this->testStorageEmpty($storage);
     }
+    
+    /**
+     * @group mysql
+     */
+    public function testMysqlStorageFilled()
+    {
+        $mysqli = $this->getMysqlObject();
+        $storage = new MysqlStorage($mysqli);
+        
+        $sql = '';
+        foreach ($this->getRoutes() as $key => $data) {
+            $sql .= ",('" . $key . "', '" . json_encode($data) . "')";
+        }
+        $sql =  'INSERT INTO routes (`key`, `data`)'
+                . ' VALUES'
+                . substr($sql, 1);
+        $mysqli->query($sql);
+        
+        $this->testStorageFilled($storage);
+
+        $storage = new MysqlStorage($mysqli, 'bad-table');
+		$this->expectedException(
+            PhpStrict\SimpleRoute\StorageException::class,
+            function () use ($storage) {
+                $storage->get('');
+            }
+        );
+    }
 }
