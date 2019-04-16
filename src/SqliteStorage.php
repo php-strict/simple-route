@@ -48,6 +48,8 @@ class SqliteStorage extends AbstractStorage
      * @param ?string $table = null
      * @param ?string $keyField = null
      * @param ?string $dataField = null
+     * 
+     * @throws \PhpStrict\SimpleRoute\StorageConnectException
      */
     public function __construct(
         string $base = null, 
