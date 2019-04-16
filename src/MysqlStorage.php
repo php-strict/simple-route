@@ -80,8 +80,7 @@ class MysqlStorage extends AbstractStorage
                 . ' WHERE `' . $this->keyField . '`'
                 . "='" . $this->db->real_escape_string($key) . "'";
         
-        [$key, $data] = $this->getEntryByQuery($sql);
-        return new StorageEntry($key, $data);
+        return $this->getStorageEntry($sql);
     }
     
     /**
@@ -103,12 +102,24 @@ class MysqlStorage extends AbstractStorage
                 . ' ORDER BY `' . $this->keyField . '` DESC'
                 . ' LIMIT 1';
         
-        [$key, $data] = $this->getEntryByQuery($sql);
+        return $this->getStorageEntry($sql);
+    }
+    
+    /**
+     * Gets StorageEntry object by SQL query.
+     * 
+     * @param string $query
+     * 
+     * @return \PhpStrict\SimpleRoute\StorageEntry
+     */
+    protected function getStorageEntry(string $query): StorageEntry
+    {
+        [$key, $data] = $this->getKeyEntryByQuery($query);
         return new StorageEntry($key, $data);
     }
     
     /**
-     * Gets storages entry by SQL query.
+     * Gets pair [key, entry] from storage by SQL query.
      * 
      * @param string $query
      * 
@@ -117,7 +128,7 @@ class MysqlStorage extends AbstractStorage
      * @throws \PhpStrict\SimpleRoute\NotFoundException
      * @throws \PhpStrict\SimpleRoute\BadStorageEntryException
      */
-    protected function getEntryByQuery(string $query): array
+    protected function getKeyEntryByQuery(string $query): array
     {
         $result = $this->db->query($query);
         if (!$result) {
