@@ -119,14 +119,14 @@ class MysqlStorage extends AbstractStorage
     {
         $result = $this->db->query($query);
         if (!$result) {
-            throw new NotFoundException();
+            throw new StorageException('Query failed');
         }
         
         $row = $result->fetch_assoc();
         $result->free();
         
         if (!is_array($row) || !array_key_exists($this->dataField, $row)) {
-            throw new BadStorageEntryException(); //@codeCoverageIgnore
+            throw new NotFoundException();
         }
         
         $data = json_decode($row[$this->dataField], true);
