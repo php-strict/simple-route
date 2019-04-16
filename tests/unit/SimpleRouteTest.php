@@ -1,6 +1,7 @@
 <?php
 use PhpStrict\SimpleRoute\Route;
 use PhpStrict\SimpleRoute\ArrayStorage;
+use PhpStrict\SimpleRoute\MysqlStorage;
 use PhpStrict\SimpleRoute\SqliteStorage;
 use PhpStrict\SimpleRoute\StorageEntry;
 use PhpStrict\SimpleRoute\StorageInterface;
@@ -153,5 +154,23 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         $this->testStorageFilled($storage, false);
         
         unset($storage);
+    }
+    
+    protected function getMysqlObject(): \mysqli
+    {
+        $mysqli = new \mysqli('localhost', 'root', '');
+        $mysqli->query('CREATE DATABASE IF NOT EXISTS simple_route_test');
+        $mysqli->query('USE simple_route_test');
+        $mysqli->query('CREATE TEMPORARY TABLE IF NOT EXISTS routes (`key` VARCHAR(255) PRIMARY KEY, `data` text)');
+        return $mysqli;
+    }
+    
+    /**
+     * @group mysql
+     */
+    public function testMysqlStorageEmpty()
+    {
+        $storage = new MysqlStorage($this->getMysqlObject(), 'routes', 'key', 'data');
+        $this->testStorageEmpty($storage);
     }
 }
