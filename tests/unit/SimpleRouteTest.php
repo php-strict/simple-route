@@ -56,16 +56,8 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         );
     }
     
-    public function testArrayStorageEmpty()
+    protected function testStorageFilled(StorageInterface $storage, bool $withCallbacks = false): void
     {
-        $this->testStorageEmpty(new ArrayStorage([]));
-	}
-	
-	public function testArrayStorageFilled()
-	{
-        $routes = $this->getRoutes();
-        $storage = new ArrayStorage($routes);
-        
         $entry = $storage->get('/');
         $this->assertNotNull($entry);
         $this->assertInstanceOf(StorageEntry::class, $entry);
@@ -73,8 +65,12 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         $this->assertTrue(is_array($entry->data));
         $this->assertCount(2, $entry->data);
         $this->assertEquals('root title', $entry->data['title']);
-        $this->assertTrue(is_callable($entry->data['callback']));
-        $this->assertEquals('root callback result', $entry->data['callback']());
+        if ($withCallbacks) {
+            $this->assertTrue(is_callable($entry->data['callback']));
+            $this->assertEquals('root callback result', $entry->data['callback']());
+        } else {
+            $this->assertFalse(is_callable($entry->data['callback']));
+        }
         
         $entry = $storage->find('/qwe/rty/param1/param2');
         $this->assertNotNull($entry);
@@ -98,6 +94,19 @@ class SimpleRouteTest extends \Codeception\Test\Unit
             function () use ($storage) {
                 $storage->get('/bad-entry-path');
             }
+        );
+    }
+    
+    public function testArrayStorageEmpty()
+    {
+        $this->testStorageEmpty(new ArrayStorage([]));
+	}
+	
+	public function testArrayStorageFilled()
+	{
+        $this->testStorageFilled(
+            new ArrayStorage($this->getRoutes()),
+            true
         );
     }
     
@@ -141,38 +150,7 @@ class SimpleRouteTest extends \Codeception\Test\Unit
                 . substr($sql, 1);
         $storage->db->exec($sql);
         
-        $entry = $storage->get('/');
-        $this->assertNotNull($entry);
-        $this->assertInstanceOf(StorageEntry::class, $entry);
-        $this->assertEquals('/', $entry->key);
-        $this->assertTrue(is_array($entry->data));
-        $this->assertCount(2, $entry->data);
-        $this->assertEquals('root title', $entry->data['title']);
-        $this->assertFalse(is_callable($entry->data['callback']));
-        
-        $entry = $storage->find('/qwe/rty/param1/param2');
-        $this->assertNotNull($entry);
-        $this->assertInstanceOf(StorageEntry::class, $entry);
-        $this->assertEquals('/qwe/rty', $entry->key);
-        
-        $entry = $storage->find('/qwe/param0/param1/param2');
-        $this->assertNotNull($entry);
-        $this->assertInstanceOf(StorageEntry::class, $entry);
-        $this->assertEquals('/qwe', $entry->key);
-        
-		$this->expectedException(
-            PhpStrict\SimpleRoute\NotFoundException::class,
-            function () use ($storage) {
-                $storage->get('/non-existence-path');
-            }
-        );
-        
-        $this->expectedException(
-            PhpStrict\SimpleRoute\BadStorageEntryException::class,
-            function () use ($storage) {
-                $storage->get('/bad-entry-path');
-            }
-        );
+        $this->testStorageFilled($storage, false);
         
         unset($storage);
     }
