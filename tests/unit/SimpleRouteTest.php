@@ -103,7 +103,7 @@ class SimpleRouteTest extends \Codeception\Test\Unit
     
     protected function getSqliteStorage(): SqliteStorage
     {
-        $storage = new class('') extends SqliteStorage {
+        $storage = new class('', 'routes', 'key', 'data') extends SqliteStorage {
             public $db;
         };
         
@@ -123,6 +123,13 @@ class SimpleRouteTest extends \Codeception\Test\Unit
     
     public function testSqliteStorageFilled()
     {
+		$this->expectedException(
+            PhpStrict\SimpleRoute\StorageConnectException::class,
+            function () {
+                $storage = new SqliteStorage('/tmp/non-existence-dir/routes.db');
+            }
+        );
+        
         $storage = $this->getSqliteStorage();
         
         $sql = '';
@@ -152,6 +159,20 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         $this->assertNotNull($entry);
         $this->assertInstanceOf(StorageEntry::class, $entry);
         $this->assertEquals('/qwe', $entry->key);
+        
+		$this->expectedException(
+            PhpStrict\SimpleRoute\NotFoundException::class,
+            function () use ($storage) {
+                $storage->get('/non-existence-path');
+            }
+        );
+        
+        $this->expectedException(
+            PhpStrict\SimpleRoute\BadStorageEntryException::class,
+            function () use ($storage) {
+                $storage->get('/bad-entry-path');
+            }
+        );
         
         unset($storage);
     }
