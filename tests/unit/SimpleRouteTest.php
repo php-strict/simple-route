@@ -201,4 +201,15 @@ class SimpleRouteTest extends \Codeception\Test\Unit
             }
         );
     }
+    
+    /**
+     * @group route 
+     */
+    public function testRoute()
+    {
+        $this->assertNull(Route::find(
+            '/non-existence-path',
+            new ArrayStorage($this->getRoutes())
+        ));
+    }
 }
