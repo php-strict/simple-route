@@ -1,5 +1,6 @@
 <?php
 use PhpStrict\SimpleRoute\Route;
+use PhpStrict\SimpleRoute\RouteResult;
 use PhpStrict\SimpleRoute\ArrayStorage;
 use PhpStrict\SimpleRoute\MysqlStorage;
 use PhpStrict\SimpleRoute\SqliteStorage;
@@ -207,9 +208,25 @@ class SimpleRouteTest extends \Codeception\Test\Unit
      */
     public function testRoute()
     {
-        $this->assertNull(Route::find(
-            '/non-existence-path',
-            new ArrayStorage($this->getRoutes())
-        ));
+        $routes = $this->getRoutes();
+        $storage = new ArrayStorage($routes);
+        
+        $this->assertNull(Route::find('/non-existence-path', $storage));
+        
+        $result = Route::find('/', $storage);
+        $this->assertNotNull($result);
+        $this->assertInstanceOf(RouteResult::class, $result);
+        $this->assertTrue(is_array($result->params));
+        $this->assertCount(0, $result->params);
+        $this->assertInstanceOf(StorageEntry::class, $result->entry);
+        $this->assertEquals('/', $result->entry->key);
+        $this->assertEquals($routes['/'], $result->entry->data);
+        
+        $this->assertEquals($result, Route::find('', $storage));
+        
+        $result = Route::find('/qwe/param1/param2', $storage);
+        $this->assertTrue(is_array($result->params));
+        $this->assertCount(2, $result->params);
+        $this->assertEquals(['param1', 'param2'], $result->params);
     }
 }
