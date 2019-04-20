@@ -142,6 +142,27 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         unlink($file);
 	}
     
+    /**
+     * @group file
+     */
+    public function testFileStorageFilled()
+    {
+        $routes = '';
+        $m = new ReflectionMethod($this, 'getRoutes');
+        $filename = $m->getFileName();
+        $start = $m->getStartLine() + 1;
+        $length = $m->getEndLine() - $start - 1;
+        $source = file($filename);
+        $routes = trim(implode('', array_slice($source, $start, $length)));
+        
+        $file = dirname(__DIR__) . '/_data/routes.php';
+        file_put_contents($file, "<?php\n" . $routes . "\n");
+        
+        $this->testStorageFilled(new FileStorage($file), true);
+        
+        unlink($file);
+	}
+    
     protected function getSqliteStorage(): SqliteStorage
     {
         $storage = new class('', 'routes', 'key', 'data') extends SqliteStorage {
