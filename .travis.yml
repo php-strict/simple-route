@@ -1,0 +1,21 @@
+language: php
+dist: trusty
+sudo: required
+php:
+  - '7.1'
+  - '7.2'
+  - '7.3'
+services:
+  - mysql
+  - redis-server
+before_install:
+  - mysql -e 'CREATE DATABASE `simple_route_test`;'
+before_script:
+  - composer install
+script:
+  - php -v
+  - phpunit --version
+  - vendor/bin/codecept --version
+  - vendor/bin/codecept run unit --coverage --coverage-xml
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
