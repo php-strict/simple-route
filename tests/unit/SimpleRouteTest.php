@@ -2,6 +2,7 @@
 use PhpStrict\SimpleRoute\Route;
 use PhpStrict\SimpleRoute\RouteResult;
 use PhpStrict\SimpleRoute\ArrayStorage;
+use PhpStrict\SimpleRoute\FileStorage;
 use PhpStrict\SimpleRoute\MysqlStorage;
 use PhpStrict\SimpleRoute\SqliteStorage;
 use PhpStrict\SimpleRoute\StorageEntry;
@@ -111,6 +112,19 @@ class SimpleRouteTest extends \Codeception\Test\Unit
             true
         );
     }
+    
+    /**
+     * @group file 
+     */
+    public function testFileStorageEmpty()
+    {
+        $file = dirname(__DIR__) . '/_data/routes.txt';
+        file_put_contents($file, '<?php return [];');
+        
+        $this->testStorageEmpty(new FileStorage($file));
+        
+        unlink($file);
+	}
     
     protected function getSqliteStorage(): SqliteStorage
     {
