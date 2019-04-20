@@ -114,11 +114,27 @@ class SimpleRouteTest extends \Codeception\Test\Unit
     }
     
     /**
-     * @group file 
+     * @group file
      */
     public function testFileStorageEmpty()
     {
+		$this->expectedException(
+            PhpStrict\SimpleRoute\StorageConnectException::class,
+            function () {
+                $storage = new FileStorage('/tmp/non-existence-dir/routes.txt');
+            }
+        );
+        
         $file = dirname(__DIR__) . '/_data/routes.txt';
+        file_put_contents($file, '');
+		
+        $this->expectedException(
+            PhpStrict\SimpleRoute\StorageConnectException::class,
+            function () use ($file) {
+                $storage = new FileStorage($file);
+            }
+        );
+        
         file_put_contents($file, '<?php return [];');
         
         $this->testStorageEmpty(new FileStorage($file));
