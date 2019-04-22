@@ -24,9 +24,9 @@ return [
 ];
 ```
 
-For path '/qwe/param1/param2' route returns second entry and parameters array [param1, param2].
+For path '/qwe/param1/param2' route returns second entry and parameters array (param1, param2).
 
-## Supported storages:
+## Supported storages
 
 *   array (supports callbacks)
 *   file (supports callbacks),
