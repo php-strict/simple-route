@@ -2,6 +2,7 @@
 
 [![Software License][ico-license]](LICENSE.txt)
 [![Build Status][ico-travis]][link-travis]
+[![codecov][ico-codecov]][link-codecov]
 
 Simple request router. All routes is a key/entry pairs.
 Router looking for entry closest to key, and returns it 
@@ -63,3 +64,5 @@ vendor\bin\codecept run
 [ico-license]: https://img.shields.io/badge/license-GPL-brightgreen.svg?style=flat-square
 [ico-travis]: https://img.shields.io/travis/php-strict/simple-route/master.svg?style=flat-square
 [link-travis]: https://travis-ci.org/php-strict/simple-route
+[ico-codecov]: https://codecov.io/gh/php-strict/simple-route/branch/master/graph/badge.svg
+[link-codecov]: https://codecov.io/gh/php-strict/simple-route
