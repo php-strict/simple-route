@@ -52,10 +52,10 @@ class SqliteStorage extends AbstractStorage
      * @throws \PhpStrict\SimpleRoute\StorageConnectException
      */
     public function __construct(
-        string $base = null, 
-        string $table = null, 
-        string $keyField = null, 
-        string $dataField = null
+        ?string $base = null, 
+        ?string $table = null, 
+        ?string $keyField = null, 
+        ?string $dataField = null
     ) {
         if (isset($base)) {
             $this->base = $base;

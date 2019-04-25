@@ -46,9 +46,9 @@ class MysqlStorage extends AbstractStorage
      */
     public function __construct(
         \mysqli $db, 
-        string $table = null, 
-        string $keyField = null, 
-        string $dataField = null
+        ?string $table = null, 
+        ?string $keyField = null, 
+        ?string $dataField = null
     ) {
         $this->db = $db;
         
