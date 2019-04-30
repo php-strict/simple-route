@@ -3,6 +3,7 @@
 [![Software License][ico-license]](LICENSE.txt)
 [![Build Status][ico-travis]][link-travis]
 [![codecov][ico-codecov]][link-codecov]
+[![Codacy Badge][ico-codacy]][link-codacy]
 
 Simple request router. All routes is a key/entry pairs.
 Router looking for entry closest to key, and returns it 
@@ -66,3 +67,5 @@ vendor\bin\codecept run
 [link-travis]: https://travis-ci.org/php-strict/simple-route
 [ico-codecov]: https://codecov.io/gh/php-strict/simple-route/branch/master/graph/badge.svg
 [link-codecov]: https://codecov.io/gh/php-strict/simple-route
+[ico-codacy]: https://api.codacy.com/project/badge/Grade/35b8cef91ae049d6b92bf270a119b877
+[link-codacy]: https://www.codacy.com/app/php-strict/simple-route?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=php-strict/simple-route&amp;utm_campaign=Badge_Grade
