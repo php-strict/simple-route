@@ -52,6 +52,69 @@ composer require php-strict/simple-route
 Basic usage:
 
 ```php
+use PhpStrict\SimpleRoute\Route;
+use PhpStrict\SimpleRoute\ArrayStorage;
+
+$routes = [
+    '/' => [
+        'title'     => 'Main page title',
+        'callback'  => function () {
+            return 'Main page callback result';
+        },
+    ],
+    '/qwe' => [
+        'title'     => 'Page qwe title',
+        'callback'  => function () {
+            return 'Page qwe callback result';
+        },
+    ],
+    '/qwe/rty' => [
+        'title'     => 'Page qwe/rty title',
+    ],
+    '/qwe/rty/uio' => [
+        'title'     => 'Page qwe/rty/uio title',
+    ],
+];
+
+$path = $_SERVER['PATH_INFO'] ?? $_SERVER['ORIG_PATH_INFO'];
+
+$result = Route::find($path, new ArrayStorage($routes));
+
+if (null === $result) {
+    //show error or redirect to mainpage
+}
+
+/*
+structure of $result for path '/qwe/param1/param2':
+{
+    entry: {
+        key: '/qwe',
+        data: [
+            'title'     => 'Page qwe title',
+            'callback'  => function () {
+                return 'Page qwe callback result';
+            }
+        ]
+    },
+    params: ['param1', 'param2']
+}
+*/
+
+//just output
+
+echo '<h1>' . $result->entry->data['title'] . '</h1>';
+
+if (isset($result->entry->data['callback'])) {
+    echo $result->entry->data['callback']();
+}
+
+if (0 < count($result->params)) {
+    echo '<ul>';
+    foreach ($result->params as $param) {
+        echo '<li>' . $param . '</li>';
+    }
+    echo '</ul>';
+}
 ```
 
 ## Tests
