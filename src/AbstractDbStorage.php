@@ -14,7 +14,7 @@ namespace PhpStrict\SimpleRoute;
 /**
  * Routes storage based on relational database.
  */
-class AbstractDbStorage extends AbstractStorage
+abstract class AbstractDbStorage extends AbstractStorage
 {
     /**
      * @var string
@@ -122,25 +122,5 @@ class AbstractDbStorage extends AbstractStorage
      * @throws \PhpStrict\SimpleRoute\NotFoundException
      * @throws \PhpStrict\SimpleRoute\BadStorageEntryException
      */
-    protected function getKeyEntryByQuery(string $query): array
-    {
-        $result = $this->db->query($query);
-        if (!$result) {
-            throw new StorageException('Query failed');
-        }
-        
-        $row = $result->fetch_assoc();
-        $result->free();
-        
-        if (!is_array($row) || !array_key_exists($this->dataField, $row)) {
-            throw new NotFoundException();
-        }
-        
-        $data = json_decode($row[$this->dataField], false);
-        if (!is_object($data) && !is_array($data)) {
-            throw new BadStorageEntryException();
-        }
-        
-        return [$row[$this->keyField], (array) $data];
-    }
+    abstract protected function getKeyEntryByQuery(string $query): array;
 }
