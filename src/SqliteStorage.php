@@ -14,7 +14,7 @@ namespace PhpStrict\SimpleRoute;
 /**
  * Routes storage based on standalone SQLite database.
  */
-class SqliteStorage extends AbstractStorage
+class SqliteStorage extends AbstractDbStorage
 {
     /**
      * @var \SQLite3
@@ -25,21 +25,6 @@ class SqliteStorage extends AbstractStorage
      * @var string
      */
     protected $base = '/routes/routes.db';
-    
-    /**
-     * @var string
-     */
-    protected $table = 'routes';
-    
-    /**
-     * @var string
-     */
-    protected $keyField = 'key';
-    
-    /**
-     * @var string
-     */
-    protected $dataField = 'data';
     
     /**
      * Requires link to database connected object provided by mysqli extension.
@@ -85,58 +70,27 @@ class SqliteStorage extends AbstractStorage
     }
     
     /**
-     * Gets storage entry by key.
+     * Return escaped (database dependent) entity (field, table name).
      * 
-     * @param string $key
+     * @param string $str
      * 
-     * @return \PhpStrict\SimpleRoute\StorageEntry
-     * 
-     * @throws \PhpStrict\SimpleRoute\NotFoundException
-     * @throws \PhpStrict\SimpleRoute\BadStorageEntryException
+     * @return string
      */
-    public function get(string $key): StorageEntry
+    protected function getEscapedEntity(string $str): string
     {
-        $sql =  'SELECT "' . $this->keyField . '", "' . $this->dataField . '"'
-                . ' FROM "' . $this->table . '"'
-                . ' WHERE "' . $this->keyField . '"'
-                . "='" . $this->db->escapeString($key) . "'";
-        
-        return $this->getStorageEntry($sql);
+        return '"' . $str . '"';
     }
     
     /**
-     * Looking for entry closest to key.
+     * Return escaped (database dependent) string.
      * 
-     * @param string $key
+     * @param string $str
      * 
-     * @return \PhpStrict\SimpleRoute\StorageEntry
-     * 
-     * @throws \PhpStrict\SimpleRoute\NotFoundException
-     * @throws \PhpStrict\SimpleRoute\BadStorageEntryException
+     * @return string
      */
-    public function find(string $key): StorageEntry
+    protected function getEscapedString(string $str): string
     {
-        $sql =  'SELECT "' . $this->keyField . '", "' . $this->dataField . '"'
-                . ' FROM "' . $this->table . '"'
-                . ' WHERE "' . $this->keyField . '"'
-                . " IN('" . implode("','", $this->getPaths($key)) . "')"
-                . ' ORDER BY "' . $this->keyField . '" DESC'
-                . ' LIMIT 1';
-        
-        return $this->getStorageEntry($sql);
-    }
-    
-    /**
-     * Gets StorageEntry object by SQL query.
-     * 
-     * @param string $query
-     * 
-     * @return \PhpStrict\SimpleRoute\StorageEntry
-     */
-    protected function getStorageEntry(string $query): StorageEntry
-    {
-        [$key, $data] = $this->getKeyEntryByQuery($query);
-        return new StorageEntry($key, $data);
+        return $this->db->escapeString($str);
     }
     
     /**
