@@ -1,6 +1,7 @@
 <?php
 use PhpStrict\SimpleRoute\Route;
 use PhpStrict\SimpleRoute\RouteResult;
+use PhpStrict\SimpleRoute\AbstractDbStorage;
 use PhpStrict\SimpleRoute\ArrayStorage;
 use PhpStrict\SimpleRoute\FileStorage;
 use PhpStrict\SimpleRoute\MysqlStorage;
@@ -172,6 +173,28 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         $storage->db->exec('CREATE TABLE routes ("key" VARCHAR(255) PRIMARY KEY, "data" text)');
         
         return $storage;
+    }
+    
+    //to coverage escape methods in AbstractDbStorage
+    public function testAbstractDbStorage()
+    {
+        $storage = new class('', 'abstractroutes', 'key', 'data') extends SqliteStorage {
+            public $db;
+            protected function getEscapedEntity(string $str): string
+            {
+                return AbstractDbStorage::getEscapedEntity($str);
+            }
+            protected function getEscapedString(string $str): string
+            {
+                return AbstractDbStorage::getEscapedString($str);
+            }
+        };
+        
+        $storage->db->exec('CREATE TABLE abstractroutes ("key" VARCHAR(255) PRIMARY KEY, "data" text)');
+        
+        $this->testStorageEmpty($storage);
+        
+        unset($storage);
     }
     
     public function testSqliteStorageEmpty()
