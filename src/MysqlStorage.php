@@ -92,8 +92,16 @@ class MysqlStorage extends AbstractDbStorage
         $row = $result->fetch_assoc();
         $result->free();
         
-        if (!is_array($row) || !array_key_exists($this->dataField, $row)) {
+        if (!is_array($row)) {
             throw new NotFoundException();
+        }
+        
+        if ('*' == $this->dataField) {
+            return [$row[$this->keyField], $row];
+        }
+        
+        if (!array_key_exists($this->dataField, $row)) {
+            throw new BadStorageEntryException(); //@codeCoverageIgnore
         }
         
         $data = json_decode($row[$this->dataField], false);
