@@ -43,8 +43,7 @@ abstract class AbstractDbStorage extends AbstractStorage
      */
     public function get(string $key): StorageEntry
     {
-        $sql =  'SELECT ' . $this->getEscapedEntity($this->keyField) . ','
-                . $this->getEscapedEntity($this->dataField)
+        $sql =  'SELECT ' . $this->getFields()
                 . ' FROM ' . $this->getEscapedEntity($this->table)
                 . ' WHERE ' . $this->getEscapedEntity($this->keyField)
                 . "='" . $this->getEscapedString($key) . "'";
@@ -64,8 +63,7 @@ abstract class AbstractDbStorage extends AbstractStorage
      */
     public function find(string $key): StorageEntry
     {
-        $sql =  'SELECT ' . $this->getEscapedEntity($this->keyField) . ','
-                . $this->getEscapedEntity($this->dataField)
+        $sql =  'SELECT ' . $this->getFields()
                 . ' FROM ' . $this->getEscapedEntity($this->table)
                 . ' WHERE ' . $this->getEscapedEntity($this->keyField)
                 . " IN('" . implode("','", $this->getPaths($key)) . "')"
@@ -73,6 +71,19 @@ abstract class AbstractDbStorage extends AbstractStorage
                 . ' LIMIT 1';
         
         return $this->getStorageEntry($sql);
+    }
+    
+    /**
+     * Return set of table fields.
+     * 
+     * @return string
+     */
+    protected function getFields(): string
+    {
+        return '*' == $this->dataField
+                ? '*'
+                : $this->getEscapedEntity($this->keyField) . ','
+                . $this->getEscapedEntity($this->dataField);
     }
     
     /**
