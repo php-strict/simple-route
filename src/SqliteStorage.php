@@ -110,7 +110,15 @@ class SqliteStorage extends AbstractDbStorage
             throw new NotFoundException();
         }
         
-        if (!is_array($row) || !array_key_exists($this->dataField, $row)) {
+        if (!is_array($row)) {
+            throw new BadStorageEntryException(); //@codeCoverageIgnore
+        }
+        
+        if ('*' == $this->dataField) {
+            return [$row[$this->keyField], $row];
+        }
+        
+        if (!array_key_exists($this->dataField, $row)) {
             throw new BadStorageEntryException(); //@codeCoverageIgnore
         }
         
