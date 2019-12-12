@@ -60,19 +60,19 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         );
     }
     
-    protected function testStorageFilled(StorageInterface $storage, bool $withCallbacks = false): void
+    protected function testStorageFilled(StorageInterface $storage, bool $withCallbacks = false, int $fieldsCount = 2): void
     {
         $entry = $storage->get('/');
         $this->assertNotNull($entry);
         $this->assertInstanceOf(StorageEntry::class, $entry);
         $this->assertEquals('/', $entry->key);
         $this->assertTrue(is_array($entry->data));
-        $this->assertCount(2, $entry->data);
+        $this->assertCount($fieldsCount, $entry->data);
         $this->assertEquals('root title', $entry->data['title']);
         if ($withCallbacks) {
             $this->assertTrue(is_callable($entry->data['callback']));
             $this->assertEquals('root callback result', $entry->data['callback']());
-        } else {
+        } elseif (isset($entry->data['callback'])) {
             $this->assertFalse(is_callable($entry->data['callback']));
         }
         
@@ -93,12 +93,15 @@ class SimpleRouteTest extends \Codeception\Test\Unit
             }
         );
         
-        $this->expectedException(
-            PhpStrict\SimpleRoute\BadStorageEntryException::class,
-            function () use ($storage) {
-                $storage->get('/bad-entry-path');
-            }
-        );
+        //check for key/data only, not for all fields in table
+        if (2 == $fieldsCount) {
+            $this->expectedException(
+                PhpStrict\SimpleRoute\BadStorageEntryException::class,
+                function () use ($storage) {
+                    $storage->get('/bad-entry-path');
+                }
+            );
+        }
     }
     
     public function testArrayStorageEmpty()
@@ -206,7 +209,7 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         unset($storage);
     }
     
-    public function testSqliteStorageFilled()
+    public function testSqliteStorageFilledWithDataField()
     {
 		$this->expectedException(
             PhpStrict\SimpleRoute\StorageConnectException::class,
@@ -231,12 +234,44 @@ class SimpleRouteTest extends \Codeception\Test\Unit
         unset($storage);
     }
     
+    public function testSqliteStorageFilledWithAllFields()
+    {
+        $storage = new class('', 'sections', 'path', '*') extends SqliteStorage {
+            public $db;
+        };
+        
+        $storage->db->exec('CREATE TABLE sections ("path" VARCHAR(255) PRIMARY KEY, "title" VARCHAR(255), "module" VARCHAR(255), "description" text)');
+        
+        $sql = '';
+        $i = 0;
+        foreach ($this->getRoutes() as $key => $data) {
+            if (!is_array($data)) {
+                continue;
+            }
+            $sql .= ",(" . 
+                "'" . $key . "', " . 
+                "'" . (isset($data['title']) ? $storage->db->escapeString($data['title']) : 'title for ' . $key) . "', " . 
+                "'module id " . ++$i . "', " . 
+                "'" . json_encode($data) . "'" . 
+                ")";
+        }
+        $sql =  'INSERT INTO sections ("path", "title", "module", "description")'
+                . ' VALUES'
+                . substr($sql, 1);
+        $storage->db->exec($sql);
+        
+        $this->testStorageFilled($storage, false, 4);
+        
+        unset($storage);
+    }
+    
     protected function getMysqlObject(): \mysqli
     {
         $mysqli = new \mysqli('localhost', 'root', '');
         $mysqli->query('CREATE DATABASE IF NOT EXISTS simple_route_test');
         $mysqli->query('USE simple_route_test');
         $mysqli->query('CREATE TEMPORARY TABLE IF NOT EXISTS routes (`key` VARCHAR(255) PRIMARY KEY, `data` text)');
+        $mysqli->query('CREATE TEMPORARY TABLE IF NOT EXISTS sections (`path` VARCHAR(255) PRIMARY KEY, `title` VARCHAR(255), `module` VARCHAR(255), `description` text)');
         return $mysqli;
     }
     
@@ -252,7 +287,7 @@ class SimpleRouteTest extends \Codeception\Test\Unit
     /**
      * @group mysql
      */
-    public function testMysqlStorageFilled()
+    public function testMysqlStorageFilledWithDataField()
     {
         $mysqli = $this->getMysqlObject();
         $storage = new MysqlStorage($mysqli);
@@ -275,6 +310,35 @@ class SimpleRouteTest extends \Codeception\Test\Unit
                 $storage->get('');
             }
         );
+    }
+    
+    /**
+     * @group mysql
+     */
+    public function testMysqlStorageFilledWithAllFields()
+    {
+        $mysqli = $this->getMysqlObject();
+        $storage = new MysqlStorage($mysqli, 'sections', 'path', '*');
+        
+        $sql = '';
+        $i = 0;
+        foreach ($this->getRoutes() as $key => $data) {
+            if (!is_array($data)) {
+                continue;
+            }
+            $sql .= ",(" . 
+                "'" . $key . "', " . 
+                "'" . (isset($data['title']) ? $mysqli->real_escape_string($data['title']) : 'title for ' . $key) . "', " . 
+                "'module id " . ++$i . "', " . 
+                "'" . json_encode($data) . "'" . 
+                ")";
+        }
+        $sql =  'INSERT INTO sections (`path`, `title`, `module`, `description`)'
+                . ' VALUES'
+                . substr($sql, 1);
+        $mysqli->query($sql);
+        
+        $this->testStorageFilled($storage, false, 4);
     }
     
     /**
